@@ -1,0 +1,25 @@
+# Node modules
+/node_modules/
+
+# Environment variables
+.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Optional: test output / temp files
+*.tmp
+*.swp
+
+# Optional: compiled JS if using TypeScript or Babel
+/dist/
+/build/
+
+# Ignore database local backups if you ever create them
+*.sql
