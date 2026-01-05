@@ -1,0 +1,15 @@
+<h2>New Message</h2>
+
+<form method="POST" action="/messages/new">
+  <div>
+    <label>Title</label><br />
+    <input type="text" name="title" required />
+  </div>
+
+  <div>
+    <label>Message</label><br />
+    <textarea name="body" rows="5" required></textarea>
+  </div>
+
+  <button type="submit">Post Message</button>
+</form>

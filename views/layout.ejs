@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Members Only</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    nav a {
+      margin-right: 10px;
+    }
+    .message {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Members Only</h1>
+    <nav>
+      <a href="/">Home</a>
+
+      <% if (!user) { %>
+        <a href="/auth/login">Login</a>
+        <a href="/auth/signup">Sign Up</a>
+      <% } else { %>
+        <a href="/messages/new">New Message</a>
+        <a href="/join">Join Club</a>
+        <a href="/auth/logout">Logout</a>
+      <% } %>
+    </nav>
+  </header>
+
+  <main>
+    <%- body %>
+  </main>
+</body>
+</html>
