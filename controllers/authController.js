@@ -17,29 +17,41 @@ exports.signupPost = async (req, res, next) => {
   try {
     const { firstName, lastName, username, password, confirmPassword } = req.body;
 
-    // Required fields
+    // 1️⃣ Required fields
     if (!firstName || !lastName || !username || !password || !confirmPassword) {
-      return res.render('signup', { error: 'All fields are required', currentUser: req.user });
+      return res.render('signup', {
+        currentUser: req.user,
+        error: 'All fields are required.',
+      });
     }
 
-    // Passwords match
+    // 2️⃣ Passwords match
     if (password !== confirmPassword) {
-      return res.render('signup', { error: 'Passwords do not match', currentUser: req.user });
+      return res.render('signup', {
+        currentUser: req.user,
+        error: 'Passwords do not match.',
+      });
     }
 
-    // Email validation
+    // 3️⃣ Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(username)) {
-      return res.render('signup', { error: 'Invalid email address', currentUser: req.user });
+      return res.render('signup', {
+        currentUser: req.user,
+        error: 'Please enter a valid email address.',
+      });
     }
 
-    // Check if user exists
+    // 4️⃣ Check if user already exists
     const existingUser = await getUserByUsername(username);
     if (existingUser) {
-      return res.render('signup', { error: 'Email already registered', currentUser: req.user });
+      return res.render('signup', {
+        currentUser: req.user,
+        error: 'Email is already registered.',
+      });
     }
 
-    // Hash password
+    // 5️⃣ Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await createUser({
@@ -49,7 +61,7 @@ exports.signupPost = async (req, res, next) => {
       password: hashedPassword,
     });
 
-    // Auto-login
+    // 6️⃣ Auto-login after signup
     passport.authenticate('local', {
       successRedirect: '/',
       failureRedirect: '/auth/signup',
@@ -65,12 +77,15 @@ exports.loginGet = (req, res) => {
   res.render('login', { currentUser: req.user, error: null });
 };
 
-/* POST login with error handling */
+/* POST login with error feedback */
 exports.loginPost = (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) return next(err);
     if (!user) {
-      return res.render('login', { currentUser: req.user, error: info.message || 'Invalid credentials' });
+      return res.render('login', {
+        currentUser: req.user,
+        error: info?.message || 'Invalid email or password.',
+      });
     }
     req.logIn(user, (err) => {
       if (err) return next(err);
@@ -101,7 +116,10 @@ exports.joinPost = async (req, res, next) => {
     const { passcode } = req.body;
 
     if (passcode !== process.env.MEMBER_SECRET) {
-      return res.render('join', { error: 'Incorrect secret', currentUser: req.user });
+      return res.render('join', {
+        currentUser: req.user,
+        error: 'Incorrect secret.',
+      });
     }
 
     await upgradeUserToMember(req.user.id);

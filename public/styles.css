@@ -1,4 +1,5 @@
 /* styles.css */
+
 /*RESET & BASE*/
 *,
 *::before,
@@ -21,14 +22,16 @@ a {
   text-decoration: none;
 }
 
-a:hover {
+a:hover,
+a:focus {
   text-decoration: underline;
+  outline: none;
 }
 
-a:focus,
-button:focus,
-input:focus,
-textarea:focus {
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
   outline: 3px solid #2563eb;
   outline-offset: 2px;
 }
@@ -97,16 +100,23 @@ nav a {
   border-radius: 4px;
   font-weight: 600;
   text-decoration: none;
+  text-align: center;
 }
 
-.auth-buttons .btn:hover {
+.auth-buttons .btn:hover,
+.auth-buttons .btn:focus {
   background-color: #1d4ed8;
+  outline: none;
 }
 
 /*FORMS*/
 form {
   max-width: 500px;
   margin: 1rem 0;
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
 }
 
 label {
@@ -116,7 +126,7 @@ label {
 input,
 textarea {
   width: 100%;
-  padding: 0.6rem;
+  padding: 0.6rem 2.5rem 0.6rem 0.6rem; /* room for eye icon */
   margin-top: 0.25rem;
   margin-bottom: 1rem;
   border: 1px solid #9ca3af;
@@ -126,6 +136,42 @@ textarea {
 
 textarea {
   resize: vertical;
+}
+
+/*PASSWORD TOGGLE CONTAINER*/
+.passwordContainer {
+  position: relative;
+}
+
+.togglePassword {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.togglePassword .material-icons {
+  font-size: 1.5rem;
+  color: #6b7280;
+}
+
+.togglePassword:focus .material-icons,
+.togglePassword:hover .material-icons {
+  color: #2563eb;
+}
+
+/*ERROR MESSAGE*/
+.error {
+  color: #b91c1c;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
 /*BUTTONS*/
@@ -139,7 +185,8 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+button:hover,
+button:focus {
   background-color: #1d4ed8;
 }
 
@@ -220,5 +267,34 @@ button:disabled {
 
   .hero h1 {
     font-size: 2.5rem;
+  }
+}
+
+/*AA LEVEL ACCESSIBILITY TIP*/
+input:invalid {
+  border-color: #b91c1c;
+}
+
+input:focus:invalid {
+  outline-color: #b91c1c;
+}
+
+button,
+a.btn {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* PASSWORD ICON MOBILE FRIENDLY */
+@media (max-width: 480px) {
+  .togglePassword {
+    padding: 0.5rem;
+  }
+
+  .togglePassword .material-icons {
+    font-size: 1.75rem;
+  }
+
+  input {
+    padding-right: 3rem; /* more space for tap on mobile */
   }
 }

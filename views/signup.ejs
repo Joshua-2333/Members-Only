@@ -1,58 +1,86 @@
 <!--signup.ejs-->
 <%
 const pageContent = `
-  <h2>Sign Up</h2>
+<h2>Sign Up</h2>
 
-  ${error ? `<div class="error">${error}</div>` : ''}
+<div id="errorMessage" class="error" role="alert" aria-live="polite">
+  ${locals.error ? locals.error : ''}
+</div>
 
-  <form method="POST" action="/auth/signup">
-    <div>
-      <label>First Name</label><br />
-      <input type="text" name="firstName" required />
-    </div>
+<form id="signupForm" method="POST" action="/auth/signup">
+  <div>
+    <label for="firstName">First Name</label><br />
+    <input type="text" name="firstName" id="firstName" required />
+  </div>
 
-    <div>
-      <label>Last Name</label><br />
-      <input type="text" name="lastName" required />
-    </div>
+  <div>
+    <label for="lastName">Last Name</label><br />
+    <input type="text" name="lastName" id="lastName" required />
+  </div>
 
-    <div>
-      <label>Email</label><br />
-      <input type="email" name="username" required placeholder="you@example.com" />
-    </div>
+  <div>
+    <label for="username">Email</label><br />
+    <input type="email" name="username" id="username" required placeholder="you@example.com" />
+  </div>
 
-    <div class="passwordContainer">
-      <label>Password</label><br />
+  <div class="passwordContainer">
+    <label for="password">Password</label><br />
+    <div class="passwordWrapper">
       <input type="password" name="password" id="password" required />
-      <button type="button" data-toggle="password" class="togglePassword">
-        <span id="passwordIcon" class="material-icons">visibility</span>
-      </button>
+      <span id="passwordIcon" class="material-symbols-outlined togglePassword" data-toggle="password" role="button" aria-label="Show password" tabindex="0">visibility</span>
     </div>
+  </div>
 
-    <div class="passwordContainer">
-      <label>Confirm Password</label><br />
+  <div class="passwordContainer">
+    <label for="confirmPassword">Confirm Password</label><br />
+    <div class="passwordWrapper">
       <input type="password" name="confirmPassword" id="confirmPassword" required />
-      <button type="button" data-toggle="confirmPassword" class="togglePassword">
-        <span id="confirmPasswordIcon" class="material-icons">visibility</span>
-      </button>
+      <span id="confirmPasswordIcon" class="material-symbols-outlined togglePassword" data-toggle="confirmPassword" role="button" aria-label="Show password" tabindex="0">visibility</span>
     </div>
+  </div>
 
-    <button type="submit">Create Account</button>
-  </form>
+  <button type="submit">Create Account</button>
+</form>
 
-  <script>
-    document.addEventListener('click', (e) => {
-      const toggleId = e.target.closest('button')?.dataset.toggle;
-      if (!toggleId) return;
-
-      const input = document.getElementById(toggleId);
-      const type = input.type === 'password' ? 'text' : 'password';
-      input.type = type;
-
-      const icon = document.getElementById(toggleId + 'Icon');
-      icon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+<script>
+  // Password toggle
+  document.querySelectorAll('.togglePassword').forEach(icon => {
+    icon.addEventListener('click', () => {
+      const input = document.getElementById(icon.dataset.toggle);
+      input.type = input.type === 'password' ? 'text' : 'password';
+      icon.textContent = input.type === 'password' ? 'visibility' : 'visibility_off';
     });
-  </script>
+    icon.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') icon.click();
+    });
+  });
+
+  // Client-side validation
+  const form = document.getElementById('signupForm');
+  const errorMessage = document.getElementById('errorMessage');
+  form.addEventListener('submit', function(e) {
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+      e.preventDefault(); errorMessage.textContent = 'All fields are required.'; return;
+    }
+    if (!emailRegex.test(email)) {
+      e.preventDefault(); errorMessage.textContent = 'Invalid email address.'; return;
+    }
+    if (password !== confirmPassword) {
+      e.preventDefault(); errorMessage.textContent = 'Passwords do not match.'; return;
+    }
+    if (password.length < 6) {
+      e.preventDefault(); errorMessage.textContent = 'Password must be at least 6 characters.'; return;
+    }
+    errorMessage.textContent = '';
+  });
+</script>
 ` %>
 
 <%- include('layout', { currentUser, content: pageContent }) %>
