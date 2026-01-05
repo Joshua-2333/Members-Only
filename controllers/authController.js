@@ -7,55 +7,79 @@ const {
   upgradeUserToMember,
 } = require('../db/queries');
 
-/*GET signup form*/
+/* GET signup form */
 exports.signupGet = (req, res) => {
-  res.render('signup', { user: req.user });
+  res.render('signup', { currentUser: req.user, error: null });
 };
 
-/*POST signup*/
+/* POST signup */
 exports.signupPost = async (req, res, next) => {
   try {
-    const { first_name, last_name, username, password } = req.body;
+    const { firstName, lastName, username, password, confirmPassword } = req.body;
 
-    const existingUser = await getUserByUsername(username);
-    if (existingUser) {
-      return res.render('signup', {
-        error: 'Username already exists',
-        user: req.user,
-      });
+    // Required fields
+    if (!firstName || !lastName || !username || !password || !confirmPassword) {
+      return res.render('signup', { error: 'All fields are required', currentUser: req.user });
     }
 
+    // Passwords match
+    if (password !== confirmPassword) {
+      return res.render('signup', { error: 'Passwords do not match', currentUser: req.user });
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(username)) {
+      return res.render('signup', { error: 'Invalid email address', currentUser: req.user });
+    }
+
+    // Check if user exists
+    const existingUser = await getUserByUsername(username);
+    if (existingUser) {
+      return res.render('signup', { error: 'Email already registered', currentUser: req.user });
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await createUser({
-      first_name,
-      last_name,
+      first_name: firstName,
+      last_name: lastName,
       username,
       password: hashedPassword,
     });
 
-    // auto-login after signup
+    // Auto-login
     passport.authenticate('local', {
       successRedirect: '/',
-      failureRedirect: '/signup',
+      failureRedirect: '/auth/signup',
     })(req, res, next);
+
   } catch (err) {
     next(err);
   }
 };
 
-/*GET login form*/
+/* GET login form */
 exports.loginGet = (req, res) => {
-  res.render('login', { user: req.user });
+  res.render('login', { currentUser: req.user, error: null });
 };
 
-/*POST login*/
-exports.loginPost = passport.authenticate('local', {
-  successRedirect: '/',
-  failureRedirect: '/login',
-});
+/* POST login with error handling */
+exports.loginPost = (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) return next(err);
+    if (!user) {
+      return res.render('login', { currentUser: req.user, error: info.message || 'Invalid credentials' });
+    }
+    req.logIn(user, (err) => {
+      if (err) return next(err);
+      return res.redirect('/');
+    });
+  })(req, res, next);
+};
 
-/*GET logout*/
+/* GET logout */
 exports.logoutGet = (req, res, next) => {
   req.logout(err => {
     if (err) return next(err);
@@ -63,24 +87,21 @@ exports.logoutGet = (req, res, next) => {
   });
 };
 
-/*GET join members form*/
+/* GET join members form */
 exports.joinGet = (req, res) => {
-  if (!req.user) return res.redirect('/login');
-  res.render('join', { user: req.user });
+  if (!req.user) return res.redirect('/auth/login');
+  res.render('join', { currentUser: req.user, error: null });
 };
 
-/*POST join members*/
+/* POST join members */
 exports.joinPost = async (req, res, next) => {
   try {
-    if (!req.user) return res.redirect('/login');
+    if (!req.user) return res.redirect('/auth/login');
 
-    const { secret } = req.body;
+    const { passcode } = req.body;
 
-    if (secret !== process.env.MEMBER_SECRET) {
-      return res.render('join', {
-        error: 'Incorrect secret',
-        user: req.user,
-      });
+    if (passcode !== process.env.MEMBER_SECRET) {
+      return res.render('join', { error: 'Incorrect secret', currentUser: req.user });
     }
 
     await upgradeUserToMember(req.user.id);

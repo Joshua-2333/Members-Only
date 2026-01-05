@@ -1,3 +1,4 @@
+/* styles.css */
 /*RESET & BASE*/
 *,
 *::before,
@@ -61,6 +62,45 @@ nav {
 nav a {
   color: #ffffff;
   font-weight: 500;
+}
+
+/*HERO SECTION (landing page)*/
+.hero {
+  background-color: #e0f2fe;
+  padding: 2rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.hero h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.auth-buttons .btn {
+  background-color: #2563eb;
+  color: #ffffff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-buttons .btn:hover {
+  background-color: #1d4ed8;
 }
 
 /*FORMS*/
@@ -143,6 +183,15 @@ button:disabled {
 }
 
 /*RESPONSIVE*/
+@media (min-width: 480px) {
+  .hero h1 {
+    font-size: 2.25rem;
+  }
+  .hero p {
+    font-size: 1.15rem;
+  }
+}
+
 @media (min-width: 768px) {
   header {
     display: flex;
@@ -152,5 +201,24 @@ button:disabled {
 
   nav {
     margin-top: 0;
+  }
+
+  .hero {
+    text-align: left;
+    padding: 3rem 2rem;
+  }
+
+  .auth-buttons {
+    justify-content: flex-start;
+  }
+}
+
+@media (min-width: 1024px) {
+  main {
+    padding: 2rem;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
   }
 }

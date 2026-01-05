@@ -4,31 +4,33 @@ const {
   createMessage,
 } = require('../db/queries');
 
-/*GET home / messages*/
+/* GET home / messages */
 exports.messageList = async (req, res, next) => {
   try {
     const messages = await getAllMessages();
 
     res.render('index', {
-      title: 'Members Only',
+      currentUser: req.user,
       messages,
-      user: req.user,
     });
   } catch (err) {
     next(err);
   }
 };
 
-/*GET new message form*/
+/* GET new message form */
 exports.messageCreateGet = (req, res) => {
-  if (!req.user) return res.redirect('/login');
-  res.render('new-message', { user: req.user });
+  if (!req.user) return res.redirect('/auth/login');
+
+  res.render('new-message', {
+    currentUser: req.user,
+  });
 };
 
-/*POST new message*/
+/* POST new message */
 exports.messageCreatePost = async (req, res, next) => {
   try {
-    if (!req.user) return res.redirect('/login');
+    if (!req.user) return res.redirect('/auth/login');
 
     const { title, body } = req.body;
 

@@ -1,24 +1,39 @@
 <!--index.ejs-->
-<% if (!messages || messages.length === 0) { %>
-  <p>No messages yet.</p>
-<% } else { %>
-  <% messages.forEach(message => { %>
-    <div class="message">
-      <h3><%= message.title %></h3>
-      <p><%= message.body %></p>
+<%
+const pageContent = `
+  ${!currentUser ? `
+    <section class="hero">
+      <h1>Welcome to Members Only</h1>
+      <p>A private space to share messages with other members. Please login or sign up to participate.</p>
+      <div class="auth-buttons">
+        <a href="/auth/login" class="btn">Login</a>
+        <a href="/auth/signup" class="btn">Sign Up</a>
+      </div>
+    </section>
+  ` : `
+    <h2>Messages</h2>
+    ${!messages || messages.length === 0 ? `
+      <p>No messages yet. Be the first to post!</p>
+    ` : `
+      ${messages.map(message => `
+        <div class="message">
+          <h3>${message.title}</h3>
+          <p>${message.body}</p>
+          ${currentUser.is_member ? `
+            <small>
+              By ${message.first_name} ${message.last_name}
+              on ${new Date(message.created_at).toLocaleString()}
+            </small>
+          ` : ``}
+          ${currentUser.is_admin ? `
+            <form method="POST" action="/messages/delete/${message.id}">
+              <button type="submit">Delete</button>
+            </form>
+          ` : ``}
+        </div>
+      `).join('')}
+    `}
+  `}
+` %>
 
-      <% if (user && user.is_member) { %>
-        <small>
-          By <%= message.first_name %> <%= message.last_name %>
-          on <%= new Date(message.created_at).toLocaleString() %>
-        </small>
-      <% } %>
-
-      <% if (user && user.is_admin) { %>
-        <form method="POST" action="/messages/delete/<%= message.id %>">
-          <button type="submit">Delete</button>
-        </form>
-      <% } %>
-    </div>
-  <% }) %>
-<% } %>
+<%- include('layout', { currentUser, content: pageContent }) %>

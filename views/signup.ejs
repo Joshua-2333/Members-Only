@@ -1,31 +1,58 @@
 <!--signup.ejs-->
-<h2>Sign Up</h2>
+<%
+const pageContent = `
+  <h2>Sign Up</h2>
 
-<form method="POST" action="/auth/signup">
-  <div>
-    <label>First Name</label><br />
-    <input type="text" name="firstName" required />
-  </div>
+  ${error ? `<div class="error">${error}</div>` : ''}
 
-  <div>
-    <label>Last Name</label><br />
-    <input type="text" name="lastName" required />
-  </div>
+  <form method="POST" action="/auth/signup">
+    <div>
+      <label>First Name</label><br />
+      <input type="text" name="firstName" required />
+    </div>
 
-  <div>
-    <label>Email</label><br />
-    <input type="email" name="username" required />
-  </div>
+    <div>
+      <label>Last Name</label><br />
+      <input type="text" name="lastName" required />
+    </div>
 
-  <div>
-    <label>Password</label><br />
-    <input type="password" name="password" required />
-  </div>
+    <div>
+      <label>Email</label><br />
+      <input type="email" name="username" required placeholder="you@example.com" />
+    </div>
 
-  <div>
-    <label>Confirm Password</label><br />
-    <input type="password" name="confirmPassword" required />
-  </div>
+    <div class="passwordContainer">
+      <label>Password</label><br />
+      <input type="password" name="password" id="password" required />
+      <button type="button" data-toggle="password" class="togglePassword">
+        <span id="passwordIcon" class="material-icons">visibility</span>
+      </button>
+    </div>
 
-  <button type="submit">Create Account</button>
-</form>
+    <div class="passwordContainer">
+      <label>Confirm Password</label><br />
+      <input type="password" name="confirmPassword" id="confirmPassword" required />
+      <button type="button" data-toggle="confirmPassword" class="togglePassword">
+        <span id="confirmPasswordIcon" class="material-icons">visibility</span>
+      </button>
+    </div>
+
+    <button type="submit">Create Account</button>
+  </form>
+
+  <script>
+    document.addEventListener('click', (e) => {
+      const toggleId = e.target.closest('button')?.dataset.toggle;
+      if (!toggleId) return;
+
+      const input = document.getElementById(toggleId);
+      const type = input.type === 'password' ? 'text' : 'password';
+      input.type = type;
+
+      const icon = document.getElementById(toggleId + 'Icon');
+      icon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+    });
+  </script>
+` %>
+
+<%- include('layout', { currentUser, content: pageContent }) %>

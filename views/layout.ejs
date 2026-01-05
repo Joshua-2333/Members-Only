@@ -1,17 +1,20 @@
-<!--layout.ejs-->
+<!-- layout.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Members Only</title>
 
   <!-- Main stylesheet -->
   <link rel="stylesheet" href="/styles.css" />
+
+  <!-- Optional favicon -->
+  <link rel="icon" href="/favicon.ico" />
 </head>
 <body>
   <header>
     <h1>Members Only</h1>
-
     <nav>
       <a href="/">Home</a>
 
@@ -20,18 +23,16 @@
         <a href="/auth/signup">Sign Up</a>
       <% } else { %>
         <a href="/messages/new">New Message</a>
-
         <% if (!currentUser.is_member) { %>
           <a href="/join">Join Club</a>
         <% } %>
-
         <a href="/auth/logout">Logout</a>
       <% } %>
     </nav>
   </header>
 
   <main>
-    <%- body %>
+    <%- content %>
   </main>
 </body>
 </html>
