@@ -1,7 +1,10 @@
 // routes/messages.js
 const express = require('express');
 const router = express.Router();
-const { createMessage, deleteMessage } = require('../db/queries');
+const {
+  createMessage,
+  deleteMessageById,
+} = require('../db/queries');
 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
@@ -14,13 +17,18 @@ router.get('/new', ensureAuthenticated, (req, res) => {
 
 router.post('/new', ensureAuthenticated, async (req, res) => {
   const { title, body } = req.body;
-  await createMessage({ title, body, userId: req.user.id });
+  await createMessage({
+    title,
+    body,
+    user_id: req.user.id,
+  });
   res.redirect('/');
 });
 
 router.post('/delete/:id', ensureAuthenticated, async (req, res) => {
   if (!req.user.is_admin) return res.send('Not allowed');
-  await deleteMessage(req.params.id);
+
+  await deleteMessageById(req.params.id);
   res.redirect('/');
 });
 

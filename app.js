@@ -12,37 +12,51 @@ const messagesRouter = require('./routes/messages');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Views setup
+/* Views */
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// Middleware
-app.use(express.urlencoded({ extended: true }));
+/* Middleware */
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Session setup
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'keyboard cat',
-  resave: false,
-  saveUninitialized: false,
-}));
+/* Session */
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'keyboard cat',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
-// Passport initialization
+/* Passport */
 require('./passport');
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Routes
+/* Make user available in all views */
+app.use((req, res, next) => {
+  res.locals.currentUser = req.user;
+  next();
+});
+
+/* Routes */
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/messages', messagesRouter);
 
-// 404 handler
+/* 404 */
 app.use((req, res) => {
-  res.status(404).send('Page not found');
+  res.status(404).render('404');
 });
 
-// Start server
+/* 500 */
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).render('500');
+});
+
+/* Server */
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
