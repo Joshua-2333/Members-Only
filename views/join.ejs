@@ -1,15 +1,30 @@
 <!--join.ejs-->
 <%
 const pageContent = `
-  <h2>Join the Club</h2>
-  <p>Enter the secret passcode to become a member.</p>
-  <form method="POST" action="/auth/join">
-    <div>
-      <label>Passcode</label><br />
-      <input type="password" name="passcode" required />
-    </div>
+<h2>Join The Inner Circle</h2>
+
+${successMessage ? `
+  <div class="membership-unlock">
+    <span>${successMessage}</span>
+  </div>
+` : `
+  <p>Answer the question below to prove you belong.</p>
+
+  ${error ? `<div class="error" role="alert">${error}</div>` : ''}
+
+  <form method="POST" action="/join" novalidate>
+    <label for="answer">${question}</label>
+    <input
+      id="answer"
+      name="answer"
+      type="number"
+      required
+      autofocus
+    />
     <button type="submit">Join</button>
   </form>
-` %>
+`}
+`;
+%>
 
 <%- include('layout', { currentUser, content: pageContent }) %>

@@ -1,7 +1,8 @@
 // db/queries.js
 const pool = require('./pool');
 
-/* USERS */
+/*USERS*/
+
 /* Create a new user */
 async function createUser({ first_name, last_name, username, password }) {
   const query = `
@@ -47,7 +48,8 @@ async function upgradeUserToMember(userId) {
 }
 
 /* MESSAGES */
-/* Get all messages (author visible only if member/admin) */
+
+/* Get all messages with author info */
 async function getAllMessages() {
   const query = `
     SELECT
@@ -78,7 +80,7 @@ async function createMessage({ title, body, user_id }) {
   await pool.query(query, values);
 }
 
-/* Delete a message by id (admin only) */
+/* Delete a message (admin only enforced elsewhere) */
 async function deleteMessageById(messageId) {
   const query = `
     DELETE FROM messages

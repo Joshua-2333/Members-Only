@@ -4,20 +4,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Members Only</title>
+  <title>The Inner Circle</title>
 
-  <!-- Main stylesheet -->
   <link rel="stylesheet" href="/styles.css" />
 
-  <!-- Google Material Symbols -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    rel="stylesheet"
+  />
 
-  <!-- Optional favicon -->
   <link rel="icon" href="/favicon.ico" />
 </head>
 <body>
   <header>
-    <h1>Members Only</h1>
+    <h1>The Inner Circle</h1>
+
     <nav>
       <a href="/">Home</a>
 
@@ -26,10 +27,29 @@
         <a href="/auth/signup">Sign Up</a>
       <% } else { %>
         <a href="/messages/new">New Message</a>
+
         <% if (!currentUser.is_member) { %>
           <a href="/join">Join Club</a>
         <% } %>
+
         <a href="/auth/logout">Logout</a>
+
+        <span class="user-badge">
+          <span class="badge
+            <%= currentUser.is_admin
+              ? 'badge-admin'
+              : currentUser.is_member
+              ? 'badge-member'
+              : 'badge-guest'
+            %>">
+            <%= currentUser.is_admin
+              ? 'Admin'
+              : currentUser.is_member
+              ? 'Member'
+              : 'Guest'
+            %>
+          </span>
+        </span>
       <% } %>
     </nav>
   </header>

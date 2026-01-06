@@ -3,8 +3,8 @@
 const pageContent = `
   ${!currentUser ? `
     <section class="hero">
-      <h1>Welcome to Members Only</h1>
-      <p>A private space to share messages with other members. Please login or sign up to participate.</p>
+      <h1>Welcome to The Inner Circle</h1>
+      <p>A private space to share messages with other members.</p>
       <div class="auth-buttons">
         <a href="/auth/login" class="btn">Login</a>
         <a href="/auth/signup" class="btn">Sign Up</a>
@@ -12,28 +12,60 @@ const pageContent = `
     </section>
   ` : `
     <h2>Messages</h2>
-    ${!messages || messages.length === 0 ? `
-      <p>No messages yet. Be the first to post!</p>
+
+    ${messages.length === 0 ? `
+      <p>No messages yet.</p>
     ` : `
       ${messages.map(message => `
-        <div class="message">
+        <article class="message">
           <h3>${message.title}</h3>
           <p>${message.body}</p>
-          ${currentUser.is_member ? `
-            <small>
-              By ${message.first_name} ${message.last_name}
-              on ${new Date(message.created_at).toLocaleString()}
-            </small>
-          ` : ``}
-          ${currentUser.is_admin ? `
-            <form method="POST" action="/messages/delete/${message.id}">
-              <button type="submit">Delete</button>
-            </form>
-          ` : ``}
-        </div>
+
+          ${
+            currentUser.is_member || currentUser.is_admin
+              ? `
+                <small class="message-meta">
+                  <span class="author">
+                    ${message.first_name} ${message.last_name}
+                    ${
+                      message.is_admin
+                        ? `<span class="badge badge-admin" title="Administrator 👑">Admin 👑</span>`
+                        : `<span class="badge badge-member" title="Verified Club Member">Member</span>`
+                    }
+                  </span>
+                  <span class="timestamp">
+                    • ${new Date(message.created_at).toLocaleString()}
+                  </span>
+                </small>
+              `
+              : `
+                <small class="message-meta">
+                  <span class="author">
+                    Anonymous
+                    <span class="badge badge-guest" title="Become a member to see authors!">Guest</span>
+                  </span>
+                </small>
+              `
+          }
+
+          ${
+            currentUser.is_admin
+              ? `
+                <form
+                  method="POST"
+                  action="/messages/${message.id}/delete"
+                  onsubmit="return confirm('Delete this message?');"
+                >
+                  <button type="submit">Delete</button>
+                </form>
+              `
+              : ``
+          }
+        </article>
       `).join('')}
     `}
   `}
-` %>
+`;
+%>
 
 <%- include('layout', { currentUser, content: pageContent }) %>

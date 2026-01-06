@@ -20,7 +20,7 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-/* Serve static files (CSS, JS, images) */
+/* Static files */
 app.use(express.static(path.join(__dirname, 'public')));
 
 /* Session */

@@ -4,83 +4,102 @@ const pageContent = `
 <h2>Sign Up</h2>
 
 <div id="errorMessage" class="error" role="alert" aria-live="polite">
-  ${locals.error ? locals.error : ''}
+  ${locals.error || ''}
 </div>
 
-<form id="signupForm" method="POST" action="/auth/signup">
-  <div>
-    <label for="firstName">First Name</label><br />
-    <input type="text" name="firstName" id="firstName" required />
+<form id="signupForm" method="POST" action="/auth/signup" novalidate>
+  <label for="firstName">First Name</label>
+  <input id="firstName" name="firstName" required />
+
+  <label for="lastName">Last Name</label>
+  <input id="lastName" name="lastName" required />
+
+  <label for="username">Email</label>
+  <input id="username" name="username" type="email" required />
+
+  <label for="password">Password</label>
+  <div class="passwordWrapper">
+    <input id="password" name="password" type="password" required aria-describedby="passwordToggle" />
+    <span
+      id="passwordToggle"
+      class="material-symbols-outlined togglePassword"
+      data-target="password"
+      role="button"
+      tabindex="0"
+      aria-label="Show password"
+      aria-pressed="false"
+    >visibility</span>
   </div>
 
-  <div>
-    <label for="lastName">Last Name</label><br />
-    <input type="text" name="lastName" id="lastName" required />
-  </div>
-
-  <div>
-    <label for="username">Email</label><br />
-    <input type="email" name="username" id="username" required placeholder="you@example.com" />
-  </div>
-
-  <div class="passwordContainer">
-    <label for="password">Password</label><br />
-    <div class="passwordWrapper">
-      <input type="password" name="password" id="password" required />
-      <span id="passwordIcon" class="material-symbols-outlined togglePassword" data-toggle="password" role="button" aria-label="Show password" tabindex="0">visibility</span>
-    </div>
-  </div>
-
-  <div class="passwordContainer">
-    <label for="confirmPassword">Confirm Password</label><br />
-    <div class="passwordWrapper">
-      <input type="password" name="confirmPassword" id="confirmPassword" required />
-      <span id="confirmPasswordIcon" class="material-symbols-outlined togglePassword" data-toggle="confirmPassword" role="button" aria-label="Show password" tabindex="0">visibility</span>
-    </div>
+  <label for="confirmPassword">Confirm Password</label>
+  <div class="passwordWrapper">
+    <input id="confirmPassword" name="confirmPassword" type="password" required aria-describedby="confirmPasswordToggle" />
+    <span
+      id="confirmPasswordToggle"
+      class="material-symbols-outlined togglePassword"
+      data-target="confirmPassword"
+      role="button"
+      tabindex="0"
+      aria-label="Show password"
+      aria-pressed="false"
+    >visibility</span>
   </div>
 
   <button type="submit">Create Account</button>
 </form>
 
 <script>
-  // Password toggle
-  document.querySelectorAll('.togglePassword').forEach(icon => {
-    icon.addEventListener('click', () => {
-      const input = document.getElementById(icon.dataset.toggle);
-      input.type = input.type === 'password' ? 'text' : 'password';
-      icon.textContent = input.type === 'password' ? 'visibility' : 'visibility_off';
-    });
-    icon.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') icon.click();
-    });
-  });
-
-  // Client-side validation
-  const form = document.getElementById('signupForm');
+(() => {
   const errorMessage = document.getElementById('errorMessage');
-  form.addEventListener('submit', function(e) {
-    const firstName = document.getElementById('firstName').value.trim();
-    const lastName = document.getElementById('lastName').value.trim();
-    const email = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+  const firstNameEl = document.getElementById('firstName');
+  const lastNameEl = document.getElementById('lastName');
+  const username = document.getElementById('username');
+  const passwordEl = document.getElementById('password');
+  const confirmPasswordEl = document.getElementById('confirmPassword');
 
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      e.preventDefault(); errorMessage.textContent = 'All fields are required.'; return;
-    }
-    if (!emailRegex.test(email)) {
-      e.preventDefault(); errorMessage.textContent = 'Invalid email address.'; return;
-    }
-    if (password !== confirmPassword) {
-      e.preventDefault(); errorMessage.textContent = 'Passwords do not match.'; return;
-    }
-    if (password.length < 6) {
-      e.preventDefault(); errorMessage.textContent = 'Password must be at least 6 characters.'; return;
-    }
-    errorMessage.textContent = '';
+  document.querySelectorAll('.togglePassword').forEach(icon => {
+    const toggle = () => {
+      const input = document.getElementById(icon.dataset.target);
+      if (!input) return;
+      const hidden = input.type === 'password';
+      input.type = hidden ? 'text' : 'password';
+      icon.textContent = hidden ? 'visibility_off' : 'visibility';
+      icon.setAttribute('aria-label', hidden ? 'Hide password' : 'Show password');
+      icon.setAttribute('aria-pressed', String(hidden));
+    };
+
+    icon.addEventListener('click', toggle);
+    icon.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle();
+      }
+    });
   });
+
+  document.getElementById('signupForm').addEventListener('submit', e => {
+    if (
+      !firstNameEl.value.trim() ||
+      !lastNameEl.value.trim() ||
+      !username.value.trim() ||
+      !passwordEl.value ||
+      !confirmPasswordEl.value
+    ) {
+      e.preventDefault();
+      errorMessage.textContent = 'All fields are required.';
+      return;
+    }
+
+    if (passwordEl.value !== confirmPasswordEl.value) {
+      e.preventDefault();
+      errorMessage.textContent = 'Passwords do not match.';
+    } else {
+      errorMessage.textContent = '';
+    }
+  });
+})();
 </script>
-` %>
+`;
+%>
 
 <%- include('layout', { currentUser, content: pageContent }) %>

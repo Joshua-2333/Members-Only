@@ -7,7 +7,7 @@ const {
   upgradeUserToMember,
 } = require('../db/queries');
 
-/* GET signup form */
+/* GET signup */
 exports.signupGet = (req, res) => {
   res.render('signup', { currentUser: req.user, error: null });
 };
@@ -17,7 +17,6 @@ exports.signupPost = async (req, res, next) => {
   try {
     const { firstName, lastName, username, password, confirmPassword } = req.body;
 
-    // 1️⃣ Required fields
     if (!firstName || !lastName || !username || !password || !confirmPassword) {
       return res.render('signup', {
         currentUser: req.user,
@@ -25,7 +24,6 @@ exports.signupPost = async (req, res, next) => {
       });
     }
 
-    // 2️⃣ Passwords match
     if (password !== confirmPassword) {
       return res.render('signup', {
         currentUser: req.user,
@@ -33,7 +31,6 @@ exports.signupPost = async (req, res, next) => {
       });
     }
 
-    // 3️⃣ Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(username)) {
       return res.render('signup', {
@@ -42,7 +39,6 @@ exports.signupPost = async (req, res, next) => {
       });
     }
 
-    // 4️⃣ Check if user already exists
     const existingUser = await getUserByUsername(username);
     if (existingUser) {
       return res.render('signup', {
@@ -51,7 +47,6 @@ exports.signupPost = async (req, res, next) => {
       });
     }
 
-    // 5️⃣ Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await createUser({
@@ -61,23 +56,21 @@ exports.signupPost = async (req, res, next) => {
       password: hashedPassword,
     });
 
-    // 6️⃣ Auto-login after signup
     passport.authenticate('local', {
       successRedirect: '/',
       failureRedirect: '/auth/signup',
     })(req, res, next);
-
   } catch (err) {
     next(err);
   }
 };
 
-/* GET login form */
+/* GET login */
 exports.loginGet = (req, res) => {
   res.render('login', { currentUser: req.user, error: null });
 };
 
-/* POST login with error feedback */
+/* POST login */
 exports.loginPost = (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) return next(err);
@@ -87,14 +80,14 @@ exports.loginPost = (req, res, next) => {
         error: info?.message || 'Invalid email or password.',
       });
     }
-    req.logIn(user, (err) => {
+    req.logIn(user, err => {
       if (err) return next(err);
-      return res.redirect('/');
+      res.redirect('/');
     });
   })(req, res, next);
 };
 
-/* GET logout */
+/* Logout */
 exports.logoutGet = (req, res, next) => {
   req.logout(err => {
     if (err) return next(err);
@@ -102,28 +95,58 @@ exports.logoutGet = (req, res, next) => {
   });
 };
 
-/* GET join members form */
+/* JOIN MEMBERS (RIDDLE LOGIC) */
+
+/* GET join page */
 exports.joinGet = (req, res) => {
   if (!req.user) return res.redirect('/auth/login');
-  res.render('join', { currentUser: req.user, error: null });
+
+  // Generate a random riddle
+  const a = Math.floor(Math.random() * 10) + 1;
+  const b = Math.floor(Math.random() * 10) + 1;
+  const question = `What is ${a} + ${b}?`;
+  req.session.riddleAnswer = (a + b).toString();
+
+  res.render('join', {
+    currentUser: req.user,
+    question,
+    error: null,
+    successMessage: null,
+  });
 };
 
-/* POST join members */
+/* POST join page */
 exports.joinPost = async (req, res, next) => {
   try {
     if (!req.user) return res.redirect('/auth/login');
 
-    const { passcode } = req.body;
+    const userAnswer = req.body.answer?.trim();
 
-    if (passcode !== process.env.MEMBER_SECRET) {
+    // Wrong answer: regenerate riddle and show error
+    if (!userAnswer || userAnswer !== req.session.riddleAnswer) {
+      const a = Math.floor(Math.random() * 10) + 1;
+      const b = Math.floor(Math.random() * 10) + 1;
+      const question = `What is ${a} + ${b}?`;
+      req.session.riddleAnswer = (a + b).toString();
+
       return res.render('join', {
         currentUser: req.user,
-        error: 'Incorrect secret.',
+        question,
+        error: '❌ Incorrect answer. Try again!',
+        successMessage: null,
       });
     }
 
+    // Correct answer: upgrade user to member
     await upgradeUserToMember(req.user.id);
-    res.redirect('/');
+    req.user.is_member = true;
+
+    res.render('join', {
+      currentUser: req.user,
+      question: null,
+      error: null,
+      successMessage: '🎉 Membership Unlocked!',
+    });
   } catch (err) {
     next(err);
   }

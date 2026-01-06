@@ -2,16 +2,17 @@
 const {
   getAllMessages,
   createMessage,
+  deleteMessageById,
 } = require('../db/queries');
 
-/* GET home / messages */
+/* GET home page */
 exports.messageList = async (req, res, next) => {
   try {
     const messages = await getAllMessages();
 
     res.render('index', {
-      currentUser: req.user,
       messages,
+      currentUser: req.user,
     });
   } catch (err) {
     next(err);
@@ -22,9 +23,7 @@ exports.messageList = async (req, res, next) => {
 exports.messageCreateGet = (req, res) => {
   if (!req.user) return res.redirect('/auth/login');
 
-  res.render('new-message', {
-    currentUser: req.user,
-  });
+  res.render('new-message');
 };
 
 /* POST new message */
@@ -40,6 +39,20 @@ exports.messageCreatePost = async (req, res, next) => {
       user_id: req.user.id,
     });
 
+    res.redirect('/');
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* POST delete message (ADMIN ONLY) */
+exports.messageDeletePost = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.is_admin) {
+      return res.status(403).send('Not authorized');
+    }
+
+    await deleteMessageById(req.params.id);
     res.redirect('/');
   } catch (err) {
     next(err);
