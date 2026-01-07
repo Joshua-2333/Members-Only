@@ -1,7 +1,7 @@
 // db/queries.js
 const pool = require('./pool');
 
-/*USERS*/
+/* USERS */
 
 /* Create a new user */
 async function createUser({ first_name, last_name, username, password }) {
@@ -89,6 +89,45 @@ async function deleteMessageById(messageId) {
   await pool.query(query, [messageId]);
 }
 
+/* --- DEFAULT MESSAGES --- */
+/* Ensure 3 specific default messages exist */
+async function insertDefaultMessages() {
+  try {
+    // Define the 3 default messages
+    const defaultMessages = [
+      { title: 'Welcome to The Inner Circle!', body: 'Hello everyone! This is a default message.' },
+      { title: 'Rules Reminder', body: 'Remember to be respectful to all members.' },
+      { title: 'Tips & Tricks', body: 'Share your tips for enjoying the club!' }
+    ];
+
+    // Ensure there is at least one user to attach messages to
+    const userRes = await pool.query('SELECT id FROM users LIMIT 1');
+    if (userRes.rows.length === 0) {
+      console.log('No users found. Default messages not inserted.');
+      return;
+    }
+    const userId = userRes.rows[0].id;
+
+    // Insert each default message only if it doesn't already exist
+    for (const msg of defaultMessages) {
+      const exists = await pool.query(
+        'SELECT 1 FROM messages WHERE title = $1 AND body = $2 LIMIT 1',
+        [msg.title, msg.body]
+      );
+      if (exists.rows.length === 0) {
+        await pool.query(
+          'INSERT INTO messages (user_id, title, body) VALUES ($1, $2, $3)',
+          [userId, msg.title, msg.body]
+        );
+      }
+    }
+
+    console.log('Default messages ensured.');
+  } catch (err) {
+    console.error('Error inserting default messages:', err);
+  }
+}
+
 module.exports = {
   createUser,
   getUserByUsername,
@@ -97,4 +136,5 @@ module.exports = {
   getAllMessages,
   createMessage,
   deleteMessageById,
+  insertDefaultMessages, // Exported to be called from app.js
 };
