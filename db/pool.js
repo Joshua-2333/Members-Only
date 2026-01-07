@@ -1,12 +1,10 @@
-// db/pool.js
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  user: process.env.DB_USER || 'josh2333',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'members_only',
-  password: process.env.DB_PASSWORD || 'supersecretpassword',
-  port: process.env.DB_PORT || 5432,
+  connectionString: process.env.DATABASE_URL, // Use the full external URL from Render
+  ssl: {
+    rejectUnauthorized: false, // Needed for Render/Postgres SSL
+  },
 });
 
 module.exports = pool;

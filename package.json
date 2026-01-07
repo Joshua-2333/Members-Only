@@ -1,13 +1,14 @@
 {
   "name": "members-only",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Members Only Club App",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Joshua Flores",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",
