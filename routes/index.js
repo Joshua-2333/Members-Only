@@ -49,36 +49,47 @@ router.get('/join', (req, res) => {
     currentUser: req.user,
     question: riddle.question,
     error: null,
+    successMessage: null,
   });
 });
 
 /* JOIN CLUB – POST */
-router.post('/join', async (req, res) => {
-  if (!req.user) return res.redirect('/auth/login');
-  if (req.user.is_member) return res.redirect('/');
+router.post('/join', async (req, res, next) => {
+  try {
+    if (!req.user) return res.redirect('/auth/login');
+    if (req.user.is_member) return res.redirect('/');
 
-  const userAnswer = Number(req.body.answer);
-  const storedRiddle = req.session.joinRiddle;
+    const userAnswer = Number(req.body.answer);
+    const storedRiddle = req.session.joinRiddle;
 
-  if (!storedRiddle || userAnswer !== storedRiddle.answer) {
-    const newRiddle = generateRiddle();
+    if (!storedRiddle || userAnswer !== storedRiddle.answer) {
+      const newRiddle = generateRiddle();
 
-    req.session.joinRiddle = {
-      question: newRiddle.question,
-      answer: newRiddle.answer,
-    };
+      req.session.joinRiddle = {
+        question: newRiddle.question,
+        answer: newRiddle.answer,
+      };
 
-    return res.render('join', {
+      return res.render('join', {
+        currentUser: req.user,
+        question: newRiddle.question,
+        error: '❌ Incorrect answer. Try again.',
+        successMessage: null,
+      });
+    }
+
+    await upgradeUserToMember(req.user.id);
+    delete req.session.joinRiddle;
+
+    res.render('join', {
       currentUser: req.user,
-      question: newRiddle.question,
-      error: '❌ Incorrect answer. Try again.',
+      question: null,
+      error: null,
+      successMessage: '🎉 Membership Unlocked!',
     });
+  } catch (err) {
+    next(err);
   }
-
-  await upgradeUserToMember(req.user.id);
-  delete req.session.joinRiddle;
-
-  res.redirect('/');
 });
 
 module.exports = router;
