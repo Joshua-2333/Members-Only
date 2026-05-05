@@ -1,11 +1,12 @@
 // db/pool.js
+require('dotenv').config();
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, // Members-Only external URL
-  ssl: {
-    rejectUnauthorized: false, // Required for Render/Postgres
-  },
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL
+    ? { rejectUnauthorized: false }
+    : false,
 });
 
 module.exports = pool;
